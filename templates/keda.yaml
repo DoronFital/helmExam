@@ -1,0 +1,29 @@
+apiVersion: keda.k8s.io/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "aks-simpleweb.fullname" . }}-scaler
+  labels:
+    {{- include "aks-simpleweb.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    deploymentName: {{ include "aks-simpleweb.fullname" . }}
+  maxReplicaCount: 3
+  triggers:
+  - type: cpu
+    metadata:
+      type: AverageValue
+      value: "60"
+  - type: memory
+    metadata:
+      type: Utilization
+      value: "75"
+  - type: cron
+    metadata:
+      timezone: Asia/Jerusalem  
+      start: 0 0 * * *       
+      end: 0 8 * * *         
+      desiredReplicas: "2"
+
+  type: {{ .Values.service.type }}
+  selector:
+    {{- include "aks-simpleweb.selectorLabels" . | nindent 4 }}
